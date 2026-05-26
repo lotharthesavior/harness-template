@@ -30,6 +30,11 @@ tmp/
 temp/
 .cache/
 
+# Local harness database: project registries, run state, task notes, and indexes.
+# These are machine/project specific and must not be tracked by this template repo.
+.harness-db/
+harness-db/
+
 # Dependency/build output
 node_modules/
 dist/

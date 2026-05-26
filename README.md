@@ -2,12 +2,20 @@
 
 This template provides an AI development harness so work can be planned, implemented, verified, reviewed, and resumed safely.
 
+The harness can operate on this repository or on a separate target project directory. Treat this repo as the control plane and the target project as the workspace being changed.
+
 ## Start Here
 
 From the project root, run:
 
 ```sh
 scripts/init.sh
+```
+
+For a separate target project:
+
+```sh
+scripts/init.sh --project /path/to/project
 ```
 
 Then read:
@@ -26,9 +34,11 @@ These files explain how agents and humans should work in this repo.
 1. Define the task.
    - Copy `tasks/task-template.md` into a new task note, or use it as a checklist.
    - Write the goal, context, acceptance criteria, constraints, implementation plan, verification plan, and rollback notes.
+   - For cross-project work, keep project-specific task notes and progress in `.harness-db/` or another ignored harness database path.
 
 2. Plan before coding.
    - Read the relevant docs and files.
+   - Identify both the harness root and target project root.
    - Break work into small steps.
    - Record the current goal and plan in `progress.md`.
 
@@ -45,11 +55,23 @@ These files explain how agents and humans should work in this repo.
 scripts/verify.sh
 ```
 
+For a separate target project:
+
+```sh
+scripts/verify.sh --project /path/to/project
+```
+
 5. Review before handoff or PR.
    - Run:
 
 ```sh
 scripts/review.sh
+```
+
+For a separate target project:
+
+```sh
+scripts/review.sh --project /path/to/project
 ```
 
 ## Important Rules
@@ -78,12 +100,24 @@ scripts/review.sh         Review helper
 tasks/task-template.md    Reusable task template
 ```
 
+Ignored local database content:
+
+```text
+.harness-db/              Local project registry, run state, task notes, indexes, and project documents
+```
+
 ## Verification
 
 Use:
 
 ```sh
 scripts/verify.sh
+```
+
+Or, for a target project outside this repo:
+
+```sh
+scripts/verify.sh --project /path/to/project
 ```
 
 The script detects common project tooling:
@@ -121,4 +155,6 @@ When source code, runtime commands, dependencies, or architecture are added:
 
 ## Local-Only Files
 
-Do not commit local runtime state such as `.venv/`, `.codex/`, `.agents/`, caches, real `.env` files, or private keys. Regenerate local agent tooling per workstation.
+Do not commit local runtime state such as `.venv/`, `.codex/`, `.agents/`, `.harness-db/`, caches, real `.env` files, or private keys. Regenerate local agent tooling per workstation.
+
+Project-related documents are local database records for the harness. Keep project registries, task notes, run progress, generated indexes, and project-specific notes in `.harness-db/` or another ignored database directory instead of tracking them in this template repository.

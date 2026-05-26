@@ -4,6 +4,13 @@ set -u
 failures=0
 ran=0
 skipped=0
+PROJECT_ROOT="${HARNESS_TARGET_ROOT:-.}"
+
+usage() {
+  info "Usage: scripts/verify.sh [--project PATH]"
+  info ""
+  info "Runs verification sensors in PATH. Defaults to the current directory."
+}
 
 info() {
   printf '%s\n' "$*"
@@ -12,6 +19,36 @@ info() {
 has_cmd() {
   command -v "$1" >/dev/null 2>&1
 }
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --project)
+      if [ "$#" -lt 2 ]; then
+        info "FAIL: --project requires a path."
+        exit 2
+      fi
+      PROJECT_ROOT="$2"
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      info "FAIL: unknown argument: $1"
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+if [ ! -d "$PROJECT_ROOT" ]; then
+  info "FAIL: project root does not exist or is not a directory: $PROJECT_ROOT"
+  exit 2
+fi
+
+PROJECT_ROOT=$(cd "$PROJECT_ROOT" && pwd -P)
+cd "$PROJECT_ROOT"
 
 mark_skip() {
   skipped=$((skipped + 1))
@@ -85,6 +122,16 @@ run_composer_script() {
   run_check "php:$script" composer run-script "$script"
 }
 
+check_go_format() {
+  out=$(
+    find . \
+      -path ./.git -prune \
+      -o -path ./vendor -prune \
+      -o -name "*.go" -exec gofmt -l {} +
+  )
+  test -z "$out"
+}
+
 has_shell_files() {
   find . \
     \( -path './.git' -o -path './.venv' -o -path './vendor' -o -path './node_modules' -o -path './target' \) -prune \
@@ -117,7 +164,7 @@ verify_format() {
   fi
 
   if [ -f go.mod ] && has_cmd go; then
-    run_check "go:fmt" sh -c 'out=$(find . -path ./.git -prune -o -path ./vendor -prune -o -name "*.go" -exec gofmt -l {} +); test -z "$out"'
+    run_check "go:fmt" check_go_format
     ran_any=1
   elif [ -f go.mod ]; then
     mark_skip "go.mod found, but go is unavailable for format check"
@@ -330,7 +377,7 @@ verify_build() {
 }
 
 info "Verification started"
-info "Repository: $(pwd)"
+info "Project root: $PROJECT_ROOT"
 
 verify_format
 verify_lint

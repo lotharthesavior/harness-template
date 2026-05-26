@@ -2,7 +2,7 @@
 
 ## Current State
 
-This repository currently contains AI-agent configuration and harness files. Application source code, runtime entrypoints, package manifests, and deployment configuration are not yet present or have not been identified.
+This repository currently contains AI-agent configuration and harness files. It is an orchestration harness, not necessarily the application repository being changed. Application source code, runtime entrypoints, package manifests, and deployment configuration may live in separate target project directories.
 
 Known repo items:
 
@@ -15,6 +15,20 @@ Known local-only items:
 - `.codex/`: local Codex/GSD agent configuration and installed helper agents.
 - `.agents/`: local agent runtime files when present.
 - `.venv/`: local Python virtual environment.
+- `.harness-db/` or `harness-db/`: local harness database for project registries, task notes, run state, indexes, and project-specific documents.
+
+## Orchestration Model
+
+Use two explicit roots for cross-project work:
+
+- Harness root: this template repository. It contains portable guides, scripts, conventions, and template files.
+- Project root: the target repository or directory being planned, changed, bootstrapped, verified, or reviewed.
+
+Harness scripts accept a target project directory with `--project PATH` or `HARNESS_TARGET_ROOT=PATH`.
+
+Project-related documents are database records, not template source. Store project registries, per-project task files, run progress, generated indexes, and project notes under `.harness-db/` or another configured local database directory that is ignored by git. Do not add those files to the template repository unless a document is intentionally generalized into reusable template guidance.
+
+Target projects do not need to contain this harness. When a target project has its own `AGENTS.md`, `CLAUDE.md`, setup docs, or verification scripts, those project-local instructions take precedence for work inside that target root.
 
 Unknown placeholders:
 
@@ -35,6 +49,7 @@ Until application code exists, use these boundaries:
 - `tasks/`: task definitions and acceptance criteria.
 - `scripts/`: local automation and verification sensors.
 - `.github/workflows/`: CI automation.
+- `.harness-db/`: ignored local database state; never required for a clean template checkout.
 
 When application code is added, document each module with:
 
@@ -50,6 +65,7 @@ When application code is added, document each module with:
 - Keep domain logic independent of UI, transport, and storage details where possible.
 - Avoid circular dependencies.
 - Keep scripts idempotent and safe to rerun.
+- Keep harness scripts explicit about whether they operate on the harness root or a target project root.
 - Do not introduce new runtime dependencies without a clear reason and setup documentation.
 - Do not require secrets for local verification or CI.
 
@@ -59,3 +75,4 @@ Add dated decisions here as the system takes shape.
 
 - 2026-05-24: Added an AI development harness with guides, verification scripts, progress tracking, and CI defaults. Application architecture remains unknown.
 - 2026-05-25: Classified `.codex/`, `.agents/`, and `.venv/` as local-only artifacts because they can contain machine-specific paths, hooks, generated state, or installed dependencies.
+- 2026-05-25: Defined the harness as a cross-project orchestrator. Project-specific documents and run state are local database content under ignored harness database directories, not tracked template files.

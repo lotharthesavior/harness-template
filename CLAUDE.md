@@ -5,11 +5,13 @@ This template is prepared for AI-assisted development using a harness of guides,
 ## Template Operating Rules
 
 - Read `AGENTS.md`, `docs/architecture.md`, `docs/conventions.md`, and `docs/setup.md` before coding.
+- Identify the harness root and target project root before planning or editing. They may be different directories.
 - Follow existing patterns first. If no pattern exists, choose the smallest clear implementation and document the decision.
 - Keep task scope narrow. Split large requests into small steps before editing.
 - Update `progress.md` after every meaningful step: planning, implementation, verification, review, blockers, and decisions.
 - Do not claim success without running `scripts/verify.sh`.
 - Cite exact commands run and their results in the final response.
+- For cross-project work, store project-specific registries, task notes, progress, and generated indexes in ignored harness database state such as `.harness-db/`; do not track those records in this template repo.
 
 ## Planning Behavior
 
@@ -19,6 +21,7 @@ Planning output must include:
 
 - Goal and non-goals.
 - Relevant files and docs read.
+- Harness root and target project root.
 - Acceptance criteria.
 - Implementation plan.
 - Verification plan.
@@ -61,7 +64,7 @@ Review must consider:
 
 Before opening or preparing a PR:
 
-- Run `scripts/verify.sh`.
+- Run `scripts/verify.sh`, or `scripts/verify.sh --project PATH` when the target project is outside the harness root.
 - Inspect `git diff`.
 - Summarize what changed.
 - Include exact commands run and results.

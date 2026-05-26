@@ -12,9 +12,11 @@ This repository uses the Harness pattern so AI agents can work safely and repeat
 Before coding:
 
 - Read `AGENTS.md`, `CLAUDE.md`, `docs/architecture.md`, `docs/conventions.md`, `docs/setup.md`, and the active task file.
+- Identify the harness root and the target project root. For cross-project work, do not assume they are the same directory.
 - Inspect the current tree and relevant files before making assumptions.
 - Decompose work into small tasks with clear acceptance criteria.
 - Update `progress.md` with the current goal, plan, and first step.
+- For cross-project work, keep project registries, task notes, run progress, generated indexes, and project-specific documents in the ignored harness database directory such as `.harness-db/`, not in tracked template files.
 
 During work:
 
@@ -23,10 +25,11 @@ During work:
 - Make one meaningful change at a time and update `progress.md` after each meaningful step.
 - Do not delete existing files unless the task explicitly requires it.
 - Preserve user changes and unrelated worktree changes.
+- When operating on another project, run harness scripts with `--project PATH` or `HARNESS_TARGET_ROOT=PATH`.
 
 After work:
 
-- Run `scripts/verify.sh` before declaring completion.
+- Run `scripts/verify.sh` before declaring completion. Use `scripts/verify.sh --project PATH` when the target project is outside the harness root.
 - Run `scripts/review.sh` for review-oriented passes or before opening a PR.
 - Do not declare success unless verification ran and the result is recorded.
 - Update `progress.md` with completed steps, decisions, next steps, blockers, and verification history.

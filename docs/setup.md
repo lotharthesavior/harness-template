@@ -27,6 +27,18 @@ scripts/init.sh
 
 The bootstrap script is safe and idempotent. It checks available tools, installs dependencies when a known lockfile or manifest is present, and prints next steps.
 
+To bootstrap a separate target project directory from this harness:
+
+```sh
+scripts/init.sh --project /path/to/project
+```
+
+Or:
+
+```sh
+HARNESS_TARGET_ROOT=/path/to/project scripts/init.sh
+```
+
 Detected bootstrap inputs:
 
 - `Makefile`: runs `make init` or `make setup` when either target exists.
@@ -39,6 +51,10 @@ Detected bootstrap inputs:
 
 No required environment variables are currently known.
 
+Optional harness variables:
+
+- `HARNESS_TARGET_ROOT`: target project directory for `scripts/init.sh`, `scripts/verify.sh`, and `scripts/review.sh` when `--project` is not passed.
+
 When environment variables are introduced, document each one here:
 
 - Name.
@@ -49,7 +65,9 @@ When environment variables are introduced, document each one here:
 
 Do not commit real secrets.
 
-Local-only files such as `.env`, `.venv/`, `.codex/`, `.agents/`, caches, and private keys are ignored by default.
+Local-only files such as `.env`, `.venv/`, `.codex/`, `.agents/`, `.harness-db/`, caches, and private keys are ignored by default.
+
+Project registries, task notes, generated indexes, and per-project progress documents belong in `.harness-db/` or another ignored local database directory. Treat them as database content owned by the local harness installation, not as tracked template files.
 
 ## Run
 
@@ -74,6 +92,20 @@ Use the verification sensor:
 ```sh
 scripts/verify.sh
 ```
+
+To verify a separate target project directory:
+
+```sh
+scripts/verify.sh --project /path/to/project
+```
+
+To review a separate target project directory:
+
+```sh
+scripts/review.sh --project /path/to/project
+```
+
+The review script runs verification in the target project root and prints target git changes separately from harness git changes.
 
 `scripts/verify.sh` automatically detects common Make, JavaScript/TypeScript, PHP, Go, Rust, and Bash commands. It runs available checks and skips missing checks clearly.
 

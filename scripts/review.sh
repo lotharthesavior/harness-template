@@ -1,28 +1,81 @@
 #!/usr/bin/env sh
 set -eu
 
+SCRIPT_DIR=$(CDPATH= cd "$(dirname "$0")" && pwd -P)
+HARNESS_ROOT=$(CDPATH= cd "$SCRIPT_DIR/.." && pwd -P)
+PROJECT_ROOT="${HARNESS_TARGET_ROOT:-.}"
+
 info() {
   printf '%s\n' "$*"
 }
 
+usage() {
+  info "Usage: scripts/review.sh [--project PATH]"
+  info ""
+  info "Runs project verification and prints target/harness diff summaries."
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --project)
+      if [ "$#" -lt 2 ]; then
+        info "FAIL: --project requires a path."
+        exit 2
+      fi
+      PROJECT_ROOT="$2"
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      info "FAIL: unknown argument: $1"
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+if [ ! -d "$PROJECT_ROOT" ]; then
+  info "FAIL: project root does not exist or is not a directory: $PROJECT_ROOT"
+  exit 2
+fi
+
+PROJECT_ROOT=$(cd "$PROJECT_ROOT" && pwd -P)
+
 info "Review started"
+info "Harness root: $HARNESS_ROOT"
+info "Project root: $PROJECT_ROOT"
 info ""
 
-if [ ! -x scripts/verify.sh ]; then
+if [ ! -x "$SCRIPT_DIR/verify.sh" ]; then
   info "FAIL: scripts/verify.sh is missing or not executable."
   exit 1
 fi
 
-scripts/verify.sh
+"$SCRIPT_DIR/verify.sh" --project "$PROJECT_ROOT"
 
 info ""
-info "==> git diff summary"
-if command -v git >/dev/null 2>&1 && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  git status --short -- .
+info "==> target git diff summary"
+if command -v git >/dev/null 2>&1 && git -C "$PROJECT_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  git -C "$PROJECT_ROOT" status --short -- .
   info ""
-  git diff --stat -- .
+  git -C "$PROJECT_ROOT" diff --stat -- .
 else
-  info "SKIP: git is unavailable or this is not a git worktree."
+  info "SKIP: git is unavailable or project root is not a git worktree."
+fi
+
+if [ "$PROJECT_ROOT" != "$HARNESS_ROOT" ]; then
+  info ""
+  info "==> harness git diff summary"
+  if command -v git >/dev/null 2>&1 && git -C "$HARNESS_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    git -C "$HARNESS_ROOT" status --short -- .
+    info ""
+    git -C "$HARNESS_ROOT" diff --stat -- .
+  else
+    info "SKIP: git is unavailable or harness root is not a git worktree."
+  fi
 fi
 
 info ""

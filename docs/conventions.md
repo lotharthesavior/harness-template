@@ -55,3 +55,5 @@ Follow existing patterns first. If the repository already has a style, test patt
 - Update `docs/setup.md` when setup, commands, dependencies, or environment variables change.
 - Update `docs/architecture.md` when module boundaries or dependencies change.
 - Update `progress.md` after every meaningful step.
+- For cross-project orchestration, keep target-specific registries, task notes, run logs, generated indexes, and project documents in ignored local database state such as `.harness-db/`.
+- Do not track project database records in this template repo unless they are intentionally generalized into reusable template documentation.

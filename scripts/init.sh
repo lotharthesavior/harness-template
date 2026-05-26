@@ -1,13 +1,51 @@
 #!/usr/bin/env sh
 set -eu
 
+PROJECT_ROOT="${HARNESS_TARGET_ROOT:-.}"
+
 info() {
   printf '%s\n' "$*"
+}
+
+usage() {
+  info "Usage: scripts/init.sh [--project PATH]"
+  info ""
+  info "Bootstraps dependencies in PATH. Defaults to the current directory."
 }
 
 has_cmd() {
   command -v "$1" >/dev/null 2>&1
 }
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --project)
+      if [ "$#" -lt 2 ]; then
+        info "FAIL: --project requires a path."
+        exit 2
+      fi
+      PROJECT_ROOT="$2"
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      info "FAIL: unknown argument: $1"
+      usage
+      exit 2
+      ;;
+  esac
+done
+
+if [ ! -d "$PROJECT_ROOT" ]; then
+  info "FAIL: project root does not exist or is not a directory: $PROJECT_ROOT"
+  exit 2
+fi
+
+PROJECT_ROOT=$(cd "$PROJECT_ROOT" && pwd -P)
+cd "$PROJECT_ROOT"
 
 run_if_available() {
   desc="$1"
@@ -126,7 +164,7 @@ bootstrap_rust() {
 }
 
 info "AI development harness bootstrap"
-info "Repository: $(pwd)"
+info "Project root: $PROJECT_ROOT"
 info ""
 
 missing=0
